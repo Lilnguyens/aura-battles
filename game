@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Battle Roulette & Goku Flame Aura Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@600;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #030712;
+            color: #f3f4f6;
+            overflow-x: hidden;
+            user-select: none;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        @keyframes gokuPopup {
+            0% { transform: translateY(0) scale(0.6) rotate(-8deg); opacity: 0; }
+            20% { transform: translateY(-25px) scale(1.3) rotate(4deg); opacity: 1; }
+            80% { transform: translateY(-75px) scale(1.1) rotate(-2deg); opacity: 1; }
+            100% { transform: translateY(-120px) scale(0.8) rotate(0deg); opacity: 0; }
+        }
+        .animate-goku-popup {
+            animation: gokuPopup 1.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes saiyanFlamePulse {
+            0%, 100% {
+                border-color: rgba(245, 158, 11, 0.8);
+                box-shadow: 0 0 25px rgba(245, 158, 11, 0.5), inset 0 0 15px rgba(245, 158, 11, 0.25);
+            }
+            50% {
+                border-color: rgba(239, 68, 68, 0.9);
+                box-shadow: 0 0 45px rgba(239, 68, 68, 0.7), inset 0 0 25px rgba(239, 68, 68, 0.35);
+            }
+        }
+        .saiyan-flame-border {
+            animation: saiyanFlamePulse 2s infinite ease-in-out;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.9);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #f59e0b;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-slate-950 text-slate-100 relative">
+
+    <header class="relative z-30 w-full px-4 py-3 border-b border-slate-800 bg-slate-900/95 backdrop-blur-md flex flex-wrap justify-between items-center gap-3 shadow-2xl">
+        <div class="flex items-center gap-3">
+            <div class="p-2.5 bg-gradient-to-tr from-amber-500 via-rose-600 to-fuchsia-600 rounded-xl shadow-lg shadow-amber-500/30 animate-pulse">
+                <i class="fa-solid fa-fire text-2xl text-slate-950"></i>
+            </div>
+            <div>
+                <h1 class="font-orbitron font-black text-xl sm:text-2xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-rose-400 to-fuchsia-400">
+                    AURA BATTLE ROULETTE
+                </h1>
+                <p class="text-[10px] sm:text-xs text-slate-400 font-mono tracking-widest flex items-center gap-1.5">
+                    <span class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                    GOKU FLAME AURA • 2V2 TEAM DUO • DIAMOND ECONOMY
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 border border-cyan-500/50 text-xs font-mono shadow-inner">
+                <i class="fa-solid fa-gem text-cyan-400 animate-bounce"></i>
+                <span class="text-slate-400">DIAMONDS:</span>
+                <span id="diamondBalance" class="text-cyan-400 font-bold font-orbitron text-sm">1,000</span>
+            </div>
+
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 border border-emerald-500/50 text-xs font-mono shadow-inner">
+                <i class="fa-solid fa-wallet text-emerald-400"></i>
+                <span class="text-slate-400">CASH:</span>
+                <span id="cashBalance" class="text-emerald-400 font-bold font-orbitron text-sm">$10.00</span>
+                <button onclick="topUpTestCash()" title="Add $5 test cash" class="ml-1 text-[10px] bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/40 px-1.5 py-0.5 rounded border border-emerald-500/40 transition">+</button>
+            </div>
+
+            <button onclick="openShopModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 via-rose-600 to-fuchsia-600 hover:from-amber-400 hover:to-fuchsia-500 text-slate-950 font-orbitron font-black text-xs sm:text-sm shadow-lg shadow-amber-500/20 transition transform hover:scale-105 active:scale-95 flex items-center gap-2">
+                <i class="fa-solid fa-store"></i>
+                <span>SHOP & TITLES</span>
+            </button>
+
+            <button id="soundToggleBtn" onclick="toggleAudio()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 transition text-xs font-mono flex items-center gap-1.5">
+                <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+                <span id="soundText" class="hidden sm:inline">SFX ON</span>
+            </button>
+        </div>
+    </header>
+
+    <div id="calibrationModal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-4">
+        <div class="bg-slate-900 border-2 border-amber-500/70 rounded-3xl max-w-lg w-full p-6 shadow-2xl relative text-center">
+            <div class="mb-4">
+                <div class="inline-block p-3 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/40 mb-2">
+                    <i class="fa-solid fa-camera-rotate text-3xl"></i>
+                </div>
+                <h2 class="font-orbitron font-black text-xl text-white">CAMERA CHECK & CALIBRATION</h2>
+                <p class="text-xs text-slate-400 font-mono mt-1">Verify face positioning & head motion before entering battle</p>
+            </div>
+
+            <div class="mb-4 text-left">
+                <label class="block text-xs font-mono text-slate-400 mb-1">YOUR FIGHTER NICKNAME:</label>
+                <input type="text" id="playerNameInput" value="SIGMA_WARRIOR" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-mono focus:border-amber-400 focus:outline-none">
+            </div>
+
+            <div class="relative w-full h-48 bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden mb-4 flex items-center justify-center">
+                <video id="calibVideo" class="w-full h-full object-cover transform -scale-x-100" autoplay playsinline muted></video>
+                <div id="calibOverlay" class="absolute inset-0 border-2 border-dashed border-amber-400/60 rounded-2xl pointer-events-none flex items-center justify-center">
+                    <span id="calibPromptText" class="bg-slate-950/80 px-3 py-1 rounded-lg text-xs font-mono text-amber-300 font-bold border border-amber-500/40">ALIGN FACE IN CENTER</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 mb-5 font-mono text-[10px]">
+                <div id="stepCenter" class="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 font-bold">1. FACE CENTER</div>
+                <div id="stepTurn" class="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 font-bold">2. TURN HEAD</div>
+                <div id="stepBlink" class="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 font-bold">3. BLINK / WAVE</div>
+            </div>
+
+            <button id="startCalibBtn" onclick="runCalibrationSequence()" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-slate-950 font-orbitron font-black text-sm shadow-lg shadow-amber-500/30 transition transform hover:scale-102">
+                START CAMERA CHECK
+            </button>
+        </div>
+    </div>
+
+    <main class="relative z-10 container mx-auto px-2 sm:px-4 py-3 flex-grow flex flex-col justify-between max-w-7xl gap-3">
+
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex flex-wrap justify-between items-center gap-3 shadow-xl backdrop-blur-md">
+            <div class="flex items-center gap-2 flex-wrap">
+                <button id="tabPvp" onclick="switchMode('pvp')" class="px-4 py-2 rounded-xl font-orbitron font-bold text-xs bg-amber-500 text-slate-950 shadow-md">
+                    <i class="fa-solid fa-bolt mr-1"></i> 1v1 PvP ROULETTE
+                </button>
+                <button id="tabDuo" onclick="switchMode('duo')" class="px-4 py-2 rounded-xl font-orbitron font-bold text-xs bg-slate-800 text-slate-300 hover:bg-slate-700">
+                    <i class="fa-solid fa-users mr-1"></i> 2v2 DUO TEAM BATTLE
+                </button>
+                <button id="tabRanked" onclick="switchMode('ranked')" class="px-4 py-2 rounded-xl font-orbitron font-bold text-xs bg-slate-800 text-slate-300 hover:bg-slate-700">
+                    <i class="fa-solid fa-trophy mr-1"></i> RANKED COMPETITIVE
+                </button>
+            </div>
+
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button id="startSearchBtn" onclick="startMatchmaking()" class="flex-1 sm:flex-initial px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-orbitron font-black text-xs shadow-lg shadow-emerald-500/25 transition">
+                    <i class="fa-solid fa-play mr-1"></i> START SEARCHING
+                </button>
+                <button id="skipMatchBtn" onclick="skipMatch()" class="flex-1 sm:flex-initial px-5 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-fuchsia-600 hover:from-rose-500 hover:to-fuchsia-500 text-white font-orbitron font-black text-xs shadow-lg shadow-rose-500/25 transition">
+                    <i class="fa-solid fa-forward mr-1"></i> SKIP / NEXT [ESC]
+                </button>
+            </div>
+        </div>
+
+        <div id="teamPowerBarContainer" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-3 shadow-xl backdrop-blur-md">
+            <div class="flex justify-between items-center mb-1 text-xs font-orbitron font-bold">
+                <span class="text-cyan-400">TEAM ALPHA (YOU & ALLY)</span>
+                <span class="text-amber-400" id="teamScoreRatio">50% vs 50%</span>
+                <span class="text-rose-400">TEAM OMEGA (ENEMIES)</span>
+            </div>
+            <div class="w-full h-3 bg-slate-950 rounded-full border border-slate-700 overflow-hidden flex">
+                <div id="teamAlphaBar" class="h-full bg-cyan-500 transition-all duration-300" style="width: 50%;"></div>
+                <div id="teamOmegaBar" class="h-full bg-rose-500 transition-all duration-300" style="width: 50%;"></div>
+            </div>
+        </div>
+
+        <div id="rankedStatusBarContainer" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-3 shadow-xl backdrop-blur-md flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-amber-500/20 border border-amber-500/50 rounded-xl text-amber-400">
+                    <i id="rankedTierIcon" class="fa-solid fa-shield-halved text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-mono text-slate-400 block">RANKED TIER</span>
+                    <span id="rankedTierName" class="font-orbitron font-black text-sm text-amber-400">BRONZE I (1,200 RP)</span>
+                </div>
+            </div>
+
+            <div class="flex-grow max-w-md mx-4">
+                <div class="flex justify-between text-[10px] font-mono text-slate-400 mb-1">
+                    <span>PROGRESS TO NEXT TIER</span>
+                    <span id="rankedProgressText">120 / 300 RP</span>
+                </div>
+                <div class="w-full h-2.5 bg-slate-950 rounded-full border border-slate-700 overflow-hidden">
+                    <div id="rankedProgressBar" class="h-full bg-gradient-to-r from-amber-500 to-rose-500 transition-all duration-300" style="width: 40%;"></div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 text-xs font-mono">
+                <span class="text-slate-400">STREAK:</span>
+                <span id="winStreakCounter" class="text-emerald-400 font-bold font-orbitron">0 WIN STREAK</span>
+            </div>
+        </div>
+
+        <!-- 30-Second Countdown Timer Bar -->
+        <div id="matchTimerBarContainer" class="bg-slate-900/90 border border-amber-500/50 rounded-2xl px-4 py-2 flex justify-between items-center shadow-xl backdrop-blur-md">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-stopwatch text-amber-400 animate-pulse"></i>
+                <span class="font-orbitron font-bold text-xs text-amber-300">MATCH CLOCK:</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span id="matchTimerText" class="font-orbitron font-black text-lg text-amber-400">00:30</span>
+                <div class="w-36 h-2 bg-slate-950 rounded-full border border-slate-700 overflow-hidden">
+                    <div id="matchTimerProgress" class="h-full bg-amber-500 transition-all duration-1000" style="width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="battleArenaGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-3 flex-grow items-stretch">
+            
+            <div id="p1Card" class="bg-slate-900/80 border-2 border-amber-500/60 rounded-2xl p-3 backdrop-blur-xl relative flex flex-col justify-between shadow-2xl saiyan-flame-border">
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
+                                <h3 id="p1NameTag" class="font-orbitron font-black text-sm sm:text-base text-amber-400">YOU (SIGMA_WARRIOR)</h3>
+                            </div>
+                            <span id="p1EquippedTitleBadge" class="inline-block mt-0.5 text-[10px] font-orbitron font-extrabold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/50 uppercase shadow-sm">
+                                [TITLE: MOGGER]
+                            </span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] font-mono text-slate-400 block">FLAME AURA</span>
+                            <span id="activeAuraBadge" class="text-xs font-mono font-bold text-amber-400 uppercase">SUPER SAIYAN GOLD</span>
+                        </div>
+                    </div>
+
+                    <div class="relative w-full h-60 sm:h-72 md:h-80 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                        <video id="p1Video" class="hidden" autoplay playsinline muted></video>
+                        <canvas id="p1Canvas" class="w-full h-full object-cover rounded-xl"></canvas>
+                        <div id="p1PopupContainer" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+                        <div class="absolute bottom-2 left-2 right-2 bg-slate-950/85 backdrop-blur-md p-2 rounded-lg border border-slate-800 flex items-center gap-2">
+                            <span class="text-[10px] font-mono text-slate-400 whitespace-nowrap">AURA BURST</span>
+                            <div class="w-full h-2.5 bg-slate-900 rounded-full border border-slate-700 overflow-hidden">
+                                <div id="p1EnergyBar" class="h-full bg-gradient-to-r from-amber-500 via-rose-500 to-fuchsia-500 rounded-full transition-all duration-100 w-0"></div>
+                            </div>
+                            <span id="p1Score" class="font-orbitron font-black text-sm text-amber-400 ml-1">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2 flex justify-between items-center bg-slate-950/70 p-2 rounded-xl border border-slate-800">
+                    <span class="text-[10px] font-mono text-slate-400">DETECTED MOTION:</span>
+                    <span id="p1LastMoveText" class="font-orbitron font-extrabold text-xs text-amber-300">MOVE IN FRONT OF CAMERA</span>
+                </div>
+            </div>
+
+            <div id="p2Card" class="bg-slate-900/80 border-2 border-fuchsia-500/60 rounded-2xl p-3 backdrop-blur-xl relative flex flex-col justify-between shadow-2xl">
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span id="p2StatusDot" class="w-2.5 h-2.5 rounded-full bg-slate-600"></span>
+                                <h3 id="p2NameTag" class="font-orbitron font-black text-sm sm:text-base text-fuchsia-400">SEARCHING...</h3>
+                            </div>
+                            <span id="p2EquippedTitleBadge" class="inline-block mt-0.5 text-[10px] font-orbitron font-extrabold px-2 py-0.5 rounded bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/50 uppercase shadow-sm">
+                                [TITLE: UNKNOWN]
+                            </span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] font-mono text-slate-400 block">OPPONENT AURA</span>
+                            <span id="p2Score" class="font-orbitron font-black text-sm sm:text-base text-amber-400">0</span>
+                        </div>
+                    </div>
+
+                    <div class="relative w-full h-60 sm:h-72 md:h-80 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                        <video id="p2Video" class="hidden" autoplay playsinline></video>
+                        <canvas id="p2Canvas" class="w-full h-full object-cover rounded-xl"></canvas>
+
+                        <div id="p2LoadingOverlay" class="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center p-6 text-center z-20">
+                            <div class="p-4 rounded-full bg-slate-900 border border-fuchsia-500/40 animate-spin mb-3">
+                                <i class="fa-solid fa-spinner text-3xl text-fuchsia-400"></i>
+                            </div>
+                            <h4 id="searchingTitleText" class="font-orbitron font-bold text-sm text-white">SEARCHING FOR OPPONENT</h4>
+                            <p class="text-xs text-slate-400 mt-1 max-w-xs">Connecting to live 1v1 video battlers...</p>
+                        </div>
+
+                        <div id="p2PopupContainer" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+
+                        <div class="absolute bottom-2 left-2 right-2 bg-slate-950/85 backdrop-blur-md p-2 rounded-lg border border-slate-800 flex items-center gap-2">
+                            <span class="text-[10px] font-mono text-slate-400 whitespace-nowrap">AURA BURST</span>
+                            <div class="w-full h-2.5 bg-slate-900 rounded-full border border-slate-700 overflow-hidden">
+                                <div id="p2EnergyBar" class="h-full bg-gradient-to-r from-fuchsia-500 via-rose-500 to-amber-400 rounded-full transition-all duration-100 w-0"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2 flex justify-between items-center bg-slate-950/70 p-2 rounded-xl border border-slate-800">
+                    <span class="text-[10px] font-mono text-slate-400">JUDGING EVALUATION:</span>
+                    <span id="p2RankTag" class="text-[10px] font-mono px-2 py-0.5 rounded bg-fuchsia-950 text-fuchsia-300 border border-fuchsia-800 font-bold uppercase">CONNECTING...</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="duoExtraCardsGrid" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div id="allyCard" class="bg-slate-900/80 border-2 border-cyan-500/60 rounded-2xl p-3 backdrop-blur-xl relative flex flex-col justify-between shadow-2xl">
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+                                <h3 id="allyNameTag" class="font-orbitron font-black text-sm sm:text-base text-cyan-400">ALLY (CYBER_DUO)</h3>
+                            </div>
+                            <span id="allyEquippedTitleBadge" class="inline-block mt-0.5 text-[10px] font-orbitron font-extrabold px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 uppercase shadow-sm">
+                                [TITLE: RIZZLER PRIME]
+                            </span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] font-mono text-slate-400 block">ALLY AURA</span>
+                            <span id="allyScore" class="font-orbitron font-black text-sm sm:text-base text-cyan-400">0</span>
+                        </div>
+                    </div>
+                    <div class="relative w-full h-40 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                        <canvas id="allyCanvas" class="w-full h-full object-cover rounded-xl"></canvas>
+                        <div class="absolute bottom-2 left-2 right-2 bg-slate-950/85 backdrop-blur-md p-1.5 rounded-lg border border-slate-800 flex items-center gap-2">
+                            <span class="text-[10px] font-mono text-slate-400 whitespace-nowrap">SYNERGY</span>
+                            <div class="w-full h-2 bg-slate-900 rounded-full border border-slate-700 overflow-hidden">
+                                <div id="allyEnergyBar" class="h-full bg-cyan-400 rounded-full w-0"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2 flex justify-between items-center bg-slate-950/70 p-2 rounded-xl border border-slate-800">
+                    <span class="text-[10px] font-mono text-slate-400">TEAM STATUS:</span>
+                    <span class="text-[10px] font-mono text-cyan-300 font-bold">2X COMBO SYNERGY ACTIVE</span>
+                </div>
+            </div>
+
+            <div id="enemy2Card" class="bg-slate-900/80 border-2 border-rose-500/60 rounded-2xl p-3 backdrop-blur-xl relative flex flex-col justify-between shadow-2xl">
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                                <h3 id="enemy2NameTag" class="font-orbitron font-black text-sm sm:text-base text-rose-400">OPPONENT 2</h3>
+                            </div>
+                            <span id="enemy2EquippedTitleBadge" class="inline-block mt-0.5 text-[10px] font-orbitron font-extrabold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/50 uppercase shadow-sm">
+                                [TITLE: VOID REAPER]
+                            </span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] font-mono text-slate-400 block">ENEMY AURA</span>
+                            <span id="enemy2Score" class="font-orbitron font-black text-sm sm:text-base text-rose-400">0</span>
+                        </div>
+                    </div>
+                    <div class="relative w-full h-40 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                        <canvas id="enemy2Canvas" class="w-full h-full object-cover rounded-xl"></canvas>
+                        <div class="absolute bottom-2 left-2 right-2 bg-slate-950/85 backdrop-blur-md p-1.5 rounded-lg border border-slate-800 flex items-center gap-2">
+                            <span class="text-[10px] font-mono text-slate-400 whitespace-nowrap">AURA BURST</span>
+                            <div class="w-full h-2 bg-slate-900 rounded-full border border-slate-700 overflow-hidden">
+                                <div id="enemy2EnergyBar" class="h-full bg-rose-500 rounded-full w-0"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2 flex justify-between items-center bg-slate-950/70 p-2 rounded-xl border border-slate-800">
+                    <span class="text-[10px] font-mono text-slate-400">THREAT LEVEL:</span>
+                    <span class="text-[10px] font-mono text-rose-400 font-bold uppercase">EXTREME</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 shadow-xl backdrop-blur-md">
+            <div class="flex justify-between items-center mb-2 pb-1 border-b border-slate-800">
+                <span class="text-xs font-orbitron font-bold text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-camera-rotate text-cyan-400"></i> AUTOMATIC CAMERA MOVE GUIDE (PERFORM MOVEMENT IN FRONT OF WEBCAM)
+                </span>
+                <span class="text-[10px] font-mono text-slate-400 hidden sm:inline">30 MOVES DETECTED VIA DIRECTIONAL OPTICAL FLOW</span>
+            </div>
+
+            <div id="moveGuideList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-2 max-h-36 overflow-y-auto pr-1"></div>
+        </div>
+
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-3 shadow-xl backdrop-blur-md flex flex-col h-32 sm:h-36">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-1.5 mb-1.5">
+                <span class="text-xs font-mono text-cyan-400 flex items-center gap-2">
+                    <i class="fa-solid fa-comments"></i> OMEGLE CHAT & LIVE SPECTATOR LOGS
+                </span>
+                <span class="text-[10px] font-mono text-slate-500">PRESS ENTER TO CHAT</span>
+            </div>
+
+            <div id="chatMessagesBox" class="flex-grow overflow-y-auto space-y-1 text-xs font-mono pr-2">
+                <div class="text-slate-500 italic">[SYSTEM] Welcome to Goku Aura Battle Roulette. Stand in front of your camera to charge fire aura particles!</div>
+            </div>
+
+            <form id="chatForm" onsubmit="handleSendChat(event)" class="mt-1.5 flex gap-2">
+                <input type="text" id="chatInput" placeholder="Type battle banter or hype..." class="flex-grow bg-slate-950 border border-slate-800 rounded-xl px-3 py-1 text-xs text-white focus:outline-none focus:border-amber-400">
+                <button type="submit" class="px-4 py-1 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 rounded-xl font-mono text-xs transition">SEND</button>
+            </form>
+        </div>
+
+    </main>
+
+    <div id="shopModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-3">
+        <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-4xl w-full p-5 shadow-2xl relative max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-gem text-2xl text-cyan-400"></i>
+                    <div>
+                        <h3 class="font-orbitron font-black text-lg text-white">DIAMOND STORE & PLAYER TITLES</h3>
+                        <p class="text-[10px] font-mono text-slate-400">Buy Diamond Packs, Unlock Titles & Equip Goku Body Flame Auras</p>
+                    </div>
+                </div>
+                <button onclick="closeShopModal()" class="text-slate-400 hover:text-white text-lg px-2 py-1"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="flex gap-2 mb-4 border-b border-slate-800 pb-2">
+                <button id="shopTabDiamonds" onclick="switchShopTab('diamonds')" class="px-3 py-1.5 rounded-xl font-orbitron font-bold text-xs bg-cyan-500 text-slate-950">
+                    <i class="fa-solid fa-gem mr-1"></i> DIAMOND BUNDLES
+                </button>
+                <button id="shopTabTitles" onclick="switchShopTab('titles')" class="px-3 py-1.5 rounded-xl font-orbitron font-bold text-xs bg-slate-800 text-slate-300">
+                    <i class="fa-solid fa-id-badge mr-1"></i> TITLES ($3.50 / 100 💎)
+                </button>
+                <button id="shopTabAuras" onclick="switchShopTab('auras')" class="px-3 py-1.5 rounded-xl font-orbitron font-bold text-xs bg-slate-800 text-slate-300">
+                    <i class="fa-solid fa-fire mr-1"></i> FLAME AURAS
+                </button>
+            </div>
+
+            <div id="shopContentArea" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 overflow-y-auto pr-1 flex-grow mb-4"></div>
+
+            <div class="pt-3 border-t border-slate-800 flex flex-wrap justify-between items-center text-xs font-mono gap-2">
+                <span class="text-slate-400">STRIPE / PAYPAL DIRECT PAYMENTS PRE-CONFIGURED FOR PRODUCTION</span>
+                <button onclick="closeShopModal()" class="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white font-orbitron font-bold rounded-xl">DONE</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="winnerModal" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-4">
+        <div class="bg-slate-900 border-2 border-amber-500 rounded-3xl max-w-md w-full p-6 text-center shadow-2xl relative">
+            <div id="winnerIconBadge" class="inline-block p-4 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/50 mb-3 animate-bounce">
+                <i class="fa-solid fa-trophy text-4xl"></i>
+            </div>
+            <h2 id="winnerText" class="font-orbitron font-black text-2xl text-amber-400">VICTORY!</h2>
+            <p id="winnerSubText" class="text-xs font-mono text-slate-300 mt-1 mb-4">You dominated the 30-second aura battle!</p>
+
+            <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 mb-5 font-mono text-xs space-y-1">
+                <div class="flex justify-between"><span class="text-slate-400">YOUR AURA SCORE:</span> <span id="finalP1Score" class="text-amber-400 font-bold font-orbitron">0</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">OPPONENT SCORE:</span> <span id="finalP2Score" class="text-rose-400 font-bold font-orbitron">0</span></div>
+                <div class="flex justify-between border-t border-slate-800 pt-1 mt-1"><span class="text-cyan-400">REWARD EARNED:</span> <span id="finalRewardText" class="text-cyan-400 font-bold font-orbitron">+500 💎</span></div>
+            </div>
+
+            <div class="flex gap-2">
+                <button onclick="closeWinnerModalAndRestart()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 text-slate-950 font-orbitron font-black text-xs shadow-lg shadow-amber-500/30 transition hover:scale-102">
+                    NEXT MATCH [30S]
+                </button>
+                <button onclick="closeWinnerModalToLobby()" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-orbitron font-bold text-xs border border-slate-700 transition">
+                    LOBBY
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userDiamonds = 1000;
+        let userCash = 10.00;
+        let equippedTitleId = 'mogger';
+        let activeAuraId = 'gold';
+
+        let audioEnabled = true;
+        let audioCtx = null;
+
+        let currentMode = 'pvp';
+        let rankedPoints = 1200;
+        let winStreak = 0;
+
+        let currentShopTab = 'diamonds';
+
+        let p1Stream = null;
+        let p1PrevFrame = null;
+
+        let p1State = { score: 0, energy: 0 };
+        let p2State = { score: 0, energy: 0 };
+        let allyState = { score: 0, energy: 0 };
+        let enemy2State = { score: 0, energy: 0 };
+
+        let lastAutoMoveTime = 0;
+        let isSearching = false;
+
+        let matchTimeRemaining = 30;
+        let matchTimerInterval = null;
+        let matchActive = false;
+        let inLobby = true; // Added lobby state flag
+
+        const OPPONENT_NAMES = ['Goku_Flexer', 'Rizz_Master', 'Ultra_Instinct_67', 'Sigma_God', 'Giga_Aura_007'];
+        const ALLY_NAMES = ['Cyber_Duo', 'Aura_Shadow', 'Kaioken_Bro', 'Saiyan_Prince'];
+
+        const RANKED_TIERS = [
+            { name: 'Bronze I', minRp: 0, icon: 'fa-shield' },
+            { name: 'Silver II', minRp: 1400, icon: 'fa-shield-halved' },
+            { name: 'Gold III', minRp: 1700, icon: 'fa-medal' },
+            { name: 'Platinum IV', minRp: 2050, icon: 'fa-award' },
+            { name: 'Diamond V', minRp: 2450, icon: 'fa-gem' },
+            { name: 'Master VI', minRp: 3000, icon: 'fa-crown' },
+            { name: 'Grandmaster VII', minRp: 4000, icon: 'fa-fire' }
+        ];
+
+        const MOVE_GUIDE = [
+            { id: '67', name: '67 Aura', pts: 67, hint: 'Fast head bob side to side', icon: 'fa-fire-burner' },
+            { id: 'griddy', name: 'Griddy', pts: 120, hint: 'Quick foot and hand tapping', icon: 'fa-person-running' },
+            { id: 'jersey_club', name: 'Jersey Club', pts: 150, hint: 'Rhythmic shoulder bouncing', icon: 'fa-music' },
+            { id: 'tuff', name: 'Tuff', pts: 200, hint: 'Hold intense motionless pose', icon: 'fa-hand-fist' },
+            { id: 'aura_swipe', name: 'Aura Swipe', pts: 100, hint: 'Swipe hand across camera', icon: 'fa-hand' },
+            { id: 'aura_walk', name: 'Aura Walk', pts: 110, hint: 'Walk back and forth in frame', icon: 'fa-shoe-prints' },
+            { id: 'aura_pose', name: 'Aura Pose', pts: 130, hint: 'Cross arms flex pose', icon: 'fa-child-reaching' },
+            { id: 'sigma_walk', name: 'Sigma Walk', pts: 300, hint: 'Slow powerful step forward', icon: 'fa-user-ninja' },
+            { id: 'mewing', name: 'Mewing', pts: 500, hint: 'Jawline motion into lens', icon: 'fa-face-smile-beam' },
+            { id: 'hit_quan', name: 'Hit the Quan', pts: 140, hint: 'Rapid double arm dip', icon: 'fa-bolt' },
+            { id: 'floss', name: 'Floss', pts: 90, hint: 'Side-to-side arm swinging', icon: 'fa-arrows-left-right' },
+            { id: 'orange_justice', name: 'Orange Justice', pts: 180, hint: 'Full body bounce & cross', icon: 'fa-shield-halved' },
+            { id: 'take_l', name: 'Take the L', pts: 250, hint: 'Hand to forehead wiggle', icon: 'fa-face-laugh-squint' },
+            { id: 'gangnam', name: 'Gangnam Style', pts: 220, hint: 'Crossed wrist horse bounce', icon: 'fa-horse' },
+            { id: 'electro', name: 'Electro Shuffle', pts: 210, hint: 'Fast side shuffle motion', icon: 'fa-bolt-lightning' },
+            { id: 'dab', name: 'Dab', pts: 80, hint: 'Sharp diagonal head dive', icon: 'fa-person-rays' },
+            { id: 'hype', name: 'Hype', pts: 160, hint: 'One arm running pump', icon: 'fa-bullhorn' },
+            { id: 'wave', name: 'Wave', pts: 50, hint: 'Gentle hand waving', icon: 'fa-hand-wave' },
+            { id: 'robot', name: 'Robot', pts: 170, hint: 'Stiff robotic angle shifts', icon: 'fa-robot' },
+            { id: 'moonwalk', name: 'Moonwalk', pts: 280, hint: 'Gliding lateral movement', icon: 'fa-moon' },
+            { id: 'macarena', name: 'Macarena', pts: 130, hint: 'Alternating hand extensions', icon: 'fa-icons' },
+            { id: 'bop', name: 'Bop', pts: 95, hint: 'Head nod up and down', icon: 'fa-compact-disc' },
+            { id: 'shuffle', name: 'Shuffle', pts: 165, hint: 'Quick feet movement', icon: 'fa-shuffle' },
+            { id: 'suiii', name: 'Suiii', pts: 700, hint: 'Jump and spin arm flex', icon: 'fa-trophy' },
+            { id: 'lock_in', name: 'Lock In', pts: 400, hint: 'Deadpan eye lock into cam', icon: 'fa-lock' },
+            { id: 'vanish', name: 'Vanish', pts: 350, hint: 'Step completely out of frame', icon: 'fa-ghost' },
+            { id: 'aura_flex', name: 'Aura Flex', pts: 450, hint: 'Double bicep power charge', icon: 'fa-dumbbell' },
+            { id: 'aura_spin', name: 'Aura Spin', pts: 260, hint: '360 body spin in camera', icon: 'fa-rotate' },
+            { id: 'aura_blast', name: 'Aura Blast', pts: 800, hint: 'Push both hands at camera', icon: 'fa-burst' },
+            { id: 'aura_charge', name: 'Aura Charge', pts: 1000, hint: 'Shake violently in lens', icon: 'fa-explosion' }
+        ];
+
+        const TITLES_CATALOG = [
+            { id: 'mogger', name: 'Mogger', costDiamonds: 100, costDollars: 3.50, unlocked: true },
+            { id: 'gigachad', name: 'GigaChad', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'mraura', name: 'Mr. Aura', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'goat', name: 'GOAT', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'sigma_overlord', name: 'Sigma Overlord', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'mewing_god', name: 'Mewing God', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'rizzler_prime', name: 'Rizzler Prime', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'aura_architect', name: 'Aura Architect', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'phantom_flexer', name: 'Phantom Flexer', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'void_reaper', name: 'Void Reaper', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'super_saiyan', name: 'Super Saiyan', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'infinite_aura', name: 'Infinite Aura', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'cosmic_being', name: 'Cosmic Being', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'apex_predator', name: 'Apex Predator', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'final_boss', name: 'Final Boss', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'divine_flexer', name: 'Divine Flexer', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'unstoppable', name: 'Unstoppable', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'mindset_master', name: 'Mindset Master', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'legend', name: 'Certified Legend', costDiamonds: 100, costDollars: 3.50, unlocked: false },
+            { id: 'secret_boss', name: 'Secret Boss', costDiamonds: 100, costDollars: 3.50, unlocked: false }
+        ];
+
+        const FLAME_AURAS = [
+            { id: 'gold', name: 'Super Saiyan Gold', price: 0.00, primary: '#f59e0b', secondary: '#ef4444', glow: 'rgba(245, 158, 11, 0.8)', unlocked: true },
+            { id: 'purple', name: 'Void Purple', price: 0.10, primary: '#a855f7', secondary: '#7e22ce', glow: 'rgba(168, 85, 247, 0.8)', unlocked: true },
+            { id: 'pink', name: 'Cherry Blossom', price: 0.15, primary: '#f472b6', secondary: '#db2777', glow: 'rgba(244, 114, 182, 0.8)', unlocked: false },
+            { id: 'red', name: 'Crimson Flame', price: 0.25, primary: '#ef4444', secondary: '#b91c1c', glow: 'rgba(239, 68, 68, 0.8)', unlocked: false },
+            { id: 'blue', name: 'Neon Sapphire', price: 0.35, primary: '#3b82f6', secondary: '#1d4ed8', glow: 'rgba(59, 130, 246, 0.8)', unlocked: false },
+            { id: 'emerald', name: 'Emerald Energy', price: 0.50, primary: '#10b981', secondary: '#047857', glow: 'rgba(16, 185, 129, 0.8)', unlocked: false },
+            { id: 'obsidian', name: 'Cosmic Obsidian', price: 1.00, primary: '#8b5cf6', secondary: '#4c1d95', glow: 'rgba(139, 92, 246, 0.8)', unlocked: false }
+        ];
+
+        const DIAMOND_BUNDLES = [
+            { id: 'pack1', diamonds: 1000, price: 1.00, bonus: 'Standard Pack' },
+            { id: 'pack2', diamonds: 5000, price: 5.00, bonus: '+500 Bonus Diamonds' },
+            { id: 'pack3', diamonds: 10000, price: 10.00, bonus: '+2,000 Bonus Diamonds!' }
+        ];
+
+        window.onload = function() {
+            renderMoveGuideList();
+            updateEconomyDisplays();
+            renderShopContent();
+            showLobbyScreen(); // Initialize in lobby mode
+        };
+
+        function showLobbyScreen() {
+            inLobby = true;
+            matchActive = false;
+            if (matchTimerInterval) clearInterval(matchTimerInterval);
+
+            // Hide battle arena cards, show lobby dashboard
+            const arenaGrid = document.getElementById('battleArenaGrid');
+            const duoGrid = document.getElementById('duoExtraCardsGrid');
+            const timerBar = document.getElementById('matchTimerBarContainer');
+            const powerBar = document.getElementById('teamPowerBarContainer');
+
+            if (arenaGrid) arenaGrid.classList.add('opacity-40', 'pointer-events-none');
+            if (duoGrid) duoGrid.classList.add('opacity-40', 'pointer-events-none');
+            if (timerBar) timerBar.classList.add('hidden');
+            if (powerBar) powerBar.classList.add('hidden');
+
+            appendChatMessage('SYSTEM', 'Returned to Battle Lobby. Choose your mode and click Quick Queue or Start Searching to begin a 30s match!');
+        }
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) audioCtx = new AudioCtx();
+            }
+        }
+
+        function playSound(type) {
+            if (!audioEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            try {
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'gesture') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'matchFound') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.1);
+                    osc.frequency.setValueAtTime(783.99, now + 0.2);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                }
+            } catch (e) {
+                // AudioContext policy catch
+            }
+        }
+
+        function runCalibrationSequence() {
+            const btn = document.getElementById('startCalibBtn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = 'CALIBRATING CAMERA...';
+            }
+
+            navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio: false })
+            .then(stream => {
+                const calibVideo = document.getElementById('calibVideo');
+                if (calibVideo) calibVideo.srcObject = stream;
+                p1Stream = stream;
+
+                const stepCenter = document.getElementById('stepCenter');
+                const calibPromptText = document.getElementById('calibPromptText');
+                if (stepCenter) stepCenter.className = 'p-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500 font-bold';
+                if (calibPromptText) calibPromptText.innerText = 'HOLD STILL IN CENTER...';
+
+                setTimeout(() => {
+                    const stepTurn = document.getElementById('stepTurn');
+                    if (stepTurn) stepTurn.className = 'p-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500 font-bold';
+                    if (calibPromptText) calibPromptText.innerText = 'TURN HEAD LEFT AND RIGHT...';
+
+                    setTimeout(() => {
+                        const stepBlink = document.getElementById('stepBlink');
+                        if (stepBlink) stepBlink.className = 'p-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500 font-bold';
+                        if (calibPromptText) calibPromptText.innerText = 'BLINK OR WAVE TO CAMERA!';
+
+                        setTimeout(() => {
+                            const calibModal = document.getElementById('calibrationModal');
+                            if (calibModal) calibModal.classList.add('hidden');
+                            
+                            const pNameInput = document.getElementById('playerNameInput');
+                            const pName = pNameInput ? pNameInput.value.trim() : 'SIGMA_WARRIOR';
+                            const p1NameTag = document.getElementById('p1NameTag');
+                            if (p1NameTag) p1NameTag.innerText = `YOU (${pName.toUpperCase()})`;
+
+                            const p1Video = document.getElementById('p1Video');
+                            if (p1Video) {
+                                p1Video.srcObject = stream;
+                                p1Video.play();
+                            }
+
+                            startP1GokuFlameLoop();
+                            showLobbyScreen(); // Land cleanly in lobby after calibration
+                            appendChatMessage('SYSTEM', `Camera calibrated! Welcome ${pName}. Join the lobby queue for 30s battles.`);
+                        }, 1200);
+                    }, 1200);
+                }, 1200);
+            })
+            .catch(e => {
+                alert("Camera permission needed for full vision tracking! Entering simulation mode.");
+                const calibModal = document.getElementById('calibrationModal');
+                if (calibModal) calibModal.classList.add('hidden');
+                startP1GokuFlameLoop();
+                showLobbyScreen();
+            });
+        }
+
+        function startMatchTimer() {
+            if (matchTimerInterval) clearInterval(matchTimerInterval);
+            matchTimeRemaining = 30; // Strictly 30 seconds per game
+            matchActive = true;
+            inLobby = false;
+
+            // Reveal arena & timer bar
+            const arenaGrid = document.getElementById('battleArenaGrid');
+            const duoGrid = document.getElementById('duoExtraCardsGrid');
+            const timerBar = document.getElementById('matchTimerBarContainer');
+            const powerBar = document.getElementById('teamPowerBarContainer');
+
+            if (arenaGrid) arenaGrid.classList.remove('opacity-40', 'pointer-events-none');
+            if (currentMode === 'duo' || currentMode === 'ranked') {
+                if (duoGrid) duoGrid.classList.remove('opacity-40', 'pointer-events-none');
+                if (powerBar) powerBar.classList.remove('hidden');
+            }
+            if (timerBar) timerBar.classList.remove('hidden');
+
+            matchTimerInterval = setInterval(() => {
+                if (!matchActive) return;
+                matchTimeRemaining--;
+
+                const timerText = document.getElementById('matchTimerText');
+                const timerProgress = document.getElementById('matchTimerProgress');
+
+                if (timerText) {
+                    timerText.innerText = `00:${matchTimeRemaining < 10 ? '0' : ''}${matchTimeRemaining}`;
+                }
+                if (timerProgress) {
+                    timerProgress.style.width = `${(matchTimeRemaining / 30) * 100}%`;
+                }
+
+                if (matchTimeRemaining <= 5 && matchTimeRemaining > 0) {
+                    playSound('gesture');
+                }
+
+                if (matchTimeRemaining <= 0) {
+                    clearInterval(matchTimerInterval);
+                    matchActive = false;
+                    triggerMatchEnd();
+                }
+            }, 1000);
+        }
+
+        function triggerMatchEnd() {
+            const isWin = p1State.score >= p2State.score;
+            const winnerModal = document.getElementById('winnerModal');
+            const winnerText = document.getElementById('winnerText');
+            const winnerSubText = document.getElementById('winnerSubText');
+            const winnerIconBadge = document.getElementById('winnerIconBadge');
+            const finalP1Score = document.getElementById('finalP1Score');
+            const finalP2Score = document.getElementById('finalP2Score');
+            const finalRewardText = document.getElementById('finalRewardText');
+
+            if (winnerText) winnerText.innerText = isWin ? 'VICTORY!' : 'DEFEAT!';
+            if (winnerSubText) winnerSubText.innerText = isWin ? 'You dominated the 30-second aura battle!' : 'Opponent out-flexed your aura!';
+            if (winnerIconBadge) winnerIconBadge.className = isWin ? 'inline-block p-4 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/50 mb-3 animate-bounce' : 'inline-block p-4 rounded-2xl bg-rose-500/20 text-rose-400 border border-rose-500/50 mb-3';
+            if (finalP1Score) finalP1Score.innerText = p1State.score;
+            if (finalP2Score) finalP2Score.innerText = p2State.score;
+
+            const reward = isWin ? 500 : 150;
+            userDiamonds += reward;
+            if (finalRewardText) finalRewardText.innerText = `+${reward} 💎`;
+            updateEconomyDisplays();
+
+            if (currentMode === 'ranked') {
+                if (isWin) {
+                    rankedPoints += 50;
+                    winStreak++;
+                } else {
+                    rankedPoints = Math.max(0, rankedPoints - 30);
+                    winStreak = 0;
+                }
+                updateRankedUI();
+            }
+
+            if (winnerModal) winnerModal.classList.remove('hidden');
+            appendChatMessage('SYSTEM', `Match ended! Winner: ${isWin ? 'YOU' : 'OPPONENT'}. Awarded +${reward} Diamonds.`);
+        }
+
+        function closeWinnerModalAndRestart() {
+            const winnerModal = document.getElementById('winnerModal');
+            if (winnerModal) winnerModal.classList.add('hidden');
+            p1State.score = 0;
+            p2State.score = 0;
+            allyState.score = 0;
+            enemy2State.score = 0;
+            const p1Score = document.getElementById('p1Score');
+            const p2Score = document.getElementById('p2Score');
+            const allyScore = document.getElementById('allyScore');
+            const enemy2Score = document.getElementById('enemy2Score');
+            if (p1Score) p1Score.innerText = '0';
+            if (p2Score) p2Score.innerText = '0';
+            if (allyScore) allyScore.innerText = '0';
+            if (enemy2Score) enemy2Score.innerText = '0';
+
+            startMatchmaking();
+        }
+
+        function closeWinnerModalToLobby() {
+            const winnerModal = document.getElementById('winnerModal');
+            if (winnerModal) winnerModal.classList.add('hidden');
+            showLobbyScreen();
+        }
+
+        function startP1GokuFlameLoop() {
+            const video = document.getElementById('p1Video');
+            const canvas = document.getElementById('p1Canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            const threshCanvas = document.createElement('canvas');
+            threshCanvas.width = 160;
+            threshCanvas.height = 120;
+            const threshCtx = threshCanvas.getContext('2d');
+
+            const flameParticles = Array.from({ length: 90 }, () => ({
+                x: 0, y: 0,
+                vx: (Math.random() - 0.5) * 3,
+                vy: -Math.random() * 6 - 3,
+                size: Math.random() * 6 + 3,
+                life: Math.random() * 35
+            }));
+
+            function loop() {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+
+                let motionVal = 0;
+
+                ctx.save();
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+
+                if (video && video.readyState === 4) {
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    threshCtx.drawImage(video, 0, 0, threshCanvas.width, threshCanvas.height);
+                    const currentFrame = threshCtx.getImageData(0, 0, threshCanvas.width, threshCanvas.height);
+
+                    if (p1PrevFrame) {
+                        let diffSum = 0;
+                        const len = currentFrame.data.length;
+                        for (let i = 0; i < len; i += 16) {
+                            const diff = Math.abs(currentFrame.data[i] - p1PrevFrame.data[i]) +
+                                         Math.abs(currentFrame.data[i+1] - p1PrevFrame.data[i+1]) +
+                                         Math.abs(currentFrame.data[i+2] - p1PrevFrame.data[i+2]);
+                            if (diff > 50) diffSum++;
+                        }
+                        motionVal = Math.min(100, Math.floor((diffSum / (len / 16)) * 400));
+                    }
+                    p1PrevFrame = currentFrame;
+                } else {
+                    ctx.fillStyle = '#090d16';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    const cx = canvas.width / 2;
+                    const cy = canvas.height / 2;
+                    ctx.fillStyle = '#1e293b';
+                    ctx.beginPath();
+                    ctx.arc(cx, cy - 25, 30, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(cx - 40, cy + 60);
+                    ctx.lineTo(cx, cy);
+                    ctx.lineTo(cx + 40, cy + 60);
+                    ctx.fill();
+
+                    motionVal = Math.floor(Math.abs(Math.sin(Date.now() * 0.005)) * 60 + 20);
+                }
+
+                ctx.restore();
+
+                p1State.energy = Math.floor(p1State.energy * 0.85 + motionVal * 0.15);
+                const p1EnergyBar = document.getElementById('p1EnergyBar');
+                if (p1EnergyBar) p1EnergyBar.style.width = `${p1State.energy}%`;
+
+                const now = Date.now();
+                if (matchActive && motionVal > 30 && (now - lastAutoMoveTime > 2000)) {
+                    lastAutoMoveTime = now;
+                    triggerAutoGesture(motionVal);
+                }
+
+                const aura = FLAME_AURAS.find(a => a.id === activeAuraId) || FLAME_AURAS[0];
+
+                flameParticles.forEach(p => {
+                    p.y += p.vy;
+                    p.x += p.vx;
+                    p.life++;
+
+                    if (p.life > 35 || p.y < 0) {
+                        p.x = (canvas.width * 0.25) + Math.random() * (canvas.width * 0.5);
+                        p.y = canvas.height * 0.85;
+                        p.vx = (Math.random() - 0.5) * 4;
+                        p.vy = -Math.random() * 6 - 3;
+                        p.life = 0;
+                    }
+
+                    ctx.save();
+                    ctx.globalAlpha = (1 - p.life / 35) * 0.85;
+                    ctx.fillStyle = aura.primary;
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = aura.secondary;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                });
+
+                requestAnimationFrame(loop);
+            }
+
+            loop();
+        }
+
+        function triggerAutoGesture(intensity) {
+            let move;
+            if (intensity > 75) move = MOVE_GUIDE.find(m => m.id === 'aura_charge') || MOVE_GUIDE[29];
+            else if (intensity > 55) move = MOVE_GUIDE.find(m => m.id === 'suiii') || MOVE_GUIDE[23];
+            else if (intensity > 40) move = MOVE_GUIDE.find(m => m.id === '67') || MOVE_GUIDE[0];
+            else move = MOVE_GUIDE[Math.floor(Math.random() * MOVE_GUIDE.length)];
+
+            let multiplier = 1;
+            if (currentMode === 'duo' && p1State.energy > 50 && allyState.energy > 50) {
+                multiplier = 2;
+                spawnPopup(1, '2X TEAM COMBO!', 'text-cyan-300 font-black text-lg');
+            } else if (currentMode === 'ranked') {
+                multiplier = 1.5;
+            }
+
+            const earnedPts = Math.round(move.pts * multiplier);
+            p1State.score += earnedPts;
+            const p1Score = document.getElementById('p1Score');
+            const p1LastMoveText = document.getElementById('p1LastMoveText');
+            if (p1Score) p1Score.innerText = p1State.score;
+            if (p1LastMoveText) p1LastMoveText.innerText = `${move.name.toUpperCase()} (+${earnedPts} AURA)`;
+
+            spawnPopup(1, `+${earnedPts} ${move.name.toUpperCase()}`, 'text-amber-300 font-black text-base sm:text-lg drop-shadow-[0_0_10px_rgba(245,158,11,0.9)]');
+            playSound('gesture');
+
+            appendChatMessage('YOU', `[AUTOMATIC MOVE] ${move.name}! (+${earnedPts} Aura)`);
+            updateTeamPowerBar();
+        }
+
+        function spawnPopup(playerId, text, className) {
+            const container = document.getElementById(playerId === 1 ? 'p1PopupContainer' : 'p2PopupContainer');
+            if (!container) return;
+
+            const div = document.createElement('div');
+            div.className = `absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none font-orbitron animate-goku-popup ${className}`;
+            div.innerText = text;
+            container.appendChild(div);
+
+            setTimeout(() => {
+                if (div.parentNode === container) container.removeChild(div);
+            }, 1300);
+        }
+
+        function startOpponentLoops() {
+            startP2Loop();
+            if (currentMode === 'duo' || currentMode === 'ranked') {
+                startAllyLoop();
+                startEnemy2Loop();
+            }
+        }
+
+        function startP2Loop() {
+            const canvas = document.getElementById('p2Canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const particles = Array.from({ length: 40 }, () => ({
+                x: Math.random() * 400, y: Math.random() * 300,
+                size: Math.random() * 4 + 2, speedY: Math.random() * 3 + 1, life: Math.random() * 50
+            }));
+
+            function loop() {
+                if ((currentMode === 'duo' || currentMode === 'ranked') && !document.getElementById('duoExtraCardsGrid').classList.contains('grid')) return;
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+
+                ctx.fillStyle = '#090d16';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const cx = canvas.width / 2;
+                const cy = canvas.height / 2;
+                ctx.fillStyle = '#1e293b';
+                ctx.beginPath();
+                ctx.arc(cx, cy - 25, 30, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(cx - 40, cy + 60);
+                ctx.lineTo(cx, cy);
+                ctx.lineTo(cx + 40, cy + 60);
+                ctx.fill();
+
+                const simMotion = Math.floor(Math.abs(Math.sin(Date.now() * 0.004)) * 80 + 10);
+                p2State.energy = simMotion;
+                const p2EnergyBar = document.getElementById('p2EnergyBar');
+                if (p2EnergyBar) p2EnergyBar.style.width = `${p2State.energy}%`;
+
+                if (matchActive && simMotion > 50 && Math.random() < 0.08) {
+                    p2State.score += 30;
+                    const p2Score = document.getElementById('p2Score');
+                    if (p2Score) p2Score.innerText = p2State.score;
+                    spawnPopup(2, '+30 ENEMY AURA', 'text-fuchsia-400 font-bold text-sm');
+                    updateTeamPowerBar();
+                }
+
+                particles.forEach(p => {
+                    p.y -= p.speedY;
+                    p.life++;
+                    if (p.life > 50 || p.y < 0) {
+                        p.x = Math.random() * canvas.width;
+                        p.y = canvas.height + 10;
+                        p.life = 0;
+                    }
+                    ctx.save();
+                    ctx.globalAlpha = (1 - p.life / 50) * 0.8;
+                    ctx.fillStyle = '#ec4899';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                });
+
+                requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        function startAllyLoop() {
+            const canvas = document.getElementById('allyCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            function loop() {
+                if (currentMode !== 'duo' && currentMode !== 'ranked') return;
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+                ctx.fillStyle = '#090d16';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const simMotion = Math.floor(Math.abs(Math.cos(Date.now() * 0.005)) * 75 + 15);
+                allyState.energy = simMotion;
+                const allyEnergyBar = document.getElementById('allyEnergyBar');
+                if (allyEnergyBar) allyEnergyBar.style.width = `${allyState.energy}%`;
+
+                if (matchActive && simMotion > 60 && Math.random() < 0.07) {
+                    allyState.score += 40;
+                    const allyScore = document.getElementById('allyScore');
+                    if (allyScore) allyScore.innerText = allyState.score;
+                    updateTeamPowerBar();
+                }
+                requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        function startEnemy2Loop() {
+            const canvas = document.getElementById('enemy2Canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            function loop() {
+                if (currentMode !== 'duo' && currentMode !== 'ranked') return;
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+                ctx.fillStyle = '#090d16';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const simMotion = Math.floor(Math.abs(Math.sin(Date.now() * 0.006)) * 80 + 20);
+                const enemy2EnergyBar = document.getElementById('enemy2EnergyBar');
+                if (enemy2EnergyBar) enemy2EnergyBar.style.width = `${simMotion}%`;
+
+                if (matchActive && simMotion > 65 && Math.random() < 0.07) {
+                    enemy2State.score += 40;
+                    const enemy2Score = document.getElementById('enemy2Score');
+                    if (enemy2Score) enemy2Score.innerText = enemy2State.score;
+                    updateTeamPowerBar();
+                }
+                requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        function updateTeamPowerBar() {
+            if (currentMode !== 'duo' && currentMode !== 'ranked') return;
+            const alphaTotal = p1State.score + allyState.score;
+            const omegaTotal = p2State.score + enemy2State.score;
+            const sum = alphaTotal + omegaTotal || 1;
+            const alphaPct = Math.round((alphaTotal / sum) * 100);
+            const omegaPct = 100 - alphaPct;
+
+            const teamAlphaBar = document.getElementById('teamAlphaBar');
+            const teamOmegaBar = document.getElementById('teamOmegaBar');
+            const teamScoreRatio = document.getElementById('teamScoreRatio');
+
+            if (teamAlphaBar) teamAlphaBar.style.width = `${alphaPct}%`;
+            if (teamOmegaBar) teamOmegaBar.style.width = `${omegaPct}%`;
+            if (teamScoreRatio) teamScoreRatio.innerText = `${alphaPct}% vs ${omegaPct}%`;
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            const tabPvp = document.getElementById('tabPvp');
+            const tabDuo = document.getElementById('tabDuo');
+            const tabRanked = document.getElementById('tabRanked');
+
+            if (tabPvp) tabPvp.className = mode === 'pvp' ? 'px-4 py-2 rounded-xl font-orbitron font-bold text-xs bg-amber-500 text-slate-950 shadow-md' : 'px-4 py-2 rounded-xl font-orbitron font-bold text-xs bg-slate-800 text-slate-300 hover:bg-slate-700';
+            if (tabDuo) tabDuo.className = mode === 'duo' ? 'px-4 py-2 rounded-xl font-orbitron font-bold text-xs bg-amber-500 text-slate-950 shadow-md' : 'px-4 py-2 rounded-xl font-orbitron font-bold text-xs bg-slate-800 text-slate-300 hover:bg-slate-700';
+            if (tabRanked) tabRanked.className = mode === 'ranked' ? 'px-4 py-2 rounded-xl font-orbitron font-bold text-xs bg-amber-500 text-slate-950 shadow-md' : 'px-4 py-2 rounded-xl font-orbitron font-bold text-xs bg-slate-800 text-slate-300 hover:bg-slate-700';
+
+            const duoGrid = document.getElementById('duoExtraCardsGrid');
+            const powerBar = document.getElementById('teamPowerBarContainer');
+            const rankedBar = document.getElementById('rankedStatusBarContainer');
+            const searchingTitleText = document.getElementById('searchingTitleText');
+
+            if (mode === 'duo') {
+                if (duoGrid) { duoGrid.classList.remove('hidden'); duoGrid.classList.add('grid'); }
+                if (powerBar) powerBar.classList.remove('hidden');
+                if (rankedBar) rankedBar.classList.add('hidden');
+                if (searchingTitleText) searchingTitleText.innerText = 'SEARCHING FOR 2v2 DUO TEAMMATES';
+            } else if (mode === 'ranked') {
+                if (duoGrid) { duoGrid.classList.remove('hidden'); duoGrid.classList.add('grid'); }
+                if (powerBar) powerBar.classList.remove('hidden');
+                if (rankedBar) rankedBar.classList.remove('hidden');
+                if (searchingTitleText) searchingTitleText.innerText = 'FINDING RANKED COMPETITIVE MATCH';
+                updateRankedUI();
+            } else {
+                if (duoGrid) { duoGrid.classList.remove('grid'); duoGrid.classList.add('hidden'); }
+                if (powerBar) powerBar.classList.add('hidden');
+                if (rankedBar) rankedBar.classList.add('hidden');
+                if (searchingTitleText) searchingTitleText.innerText = 'SEARCHING FOR 1v1 OPPONENT';
+            }
+
+            appendChatMessage('SYSTEM', `Switched mode to ${mode.toUpperCase()}. Press 'START SEARCHING'.`);
+        }
+
+        function updateRankedUI() {
+            let currentTier = RANKED_TIERS[0];
+            let nextTierMin = 1400;
+
+            for (let i = RANKED_TIERS.length - 1; i >= 0; i--) {
+                if (rankedPoints >= RANKED_TIERS[i].minRp) {
+                    currentTier = RANKED_TIERS[i];
+                    nextTierMin = RANKED_TIERS[i+1] ? RANKED_TIERS[i+1].minRp : RANKED_TIERS[i].minRp + 500;
+                    break;
+                }
+            }
+
+            const prevMin = currentTier.minRp;
+            const progress = Math.min(100, Math.max(0, ((rankedPoints - prevMin) / (nextTierMin - prevMin)) * 100));
+
+            const rankedTierName = document.getElementById('rankedTierName');
+            const rankedTierIcon = document.getElementById('rankedTierIcon');
+            const rankedProgressText = document.getElementById('rankedProgressText');
+            const rankedProgressBar = document.getElementById('rankedProgressBar');
+            const winStreakCounter = document.getElementById('winStreakCounter');
+
+            if (rankedTierName) rankedTierName.innerText = `${currentTier.name.toUpperCase()} (${rankedPoints} RP)`;
+            if (rankedTierIcon) rankedTierIcon.className = `fa-solid ${currentTier.icon} text-xl`;
+            if (rankedProgressText) rankedProgressText.innerText = `${rankedPoints} / ${nextTierMin} RP`;
+            if (rankedProgressBar) rankedProgressBar.style.width = `${progress}%`;
+            if (winStreakCounter) winStreakCounter.innerText = `${winStreak} WIN STREAK`;
+        }
+
+        function startMatchmaking() {
+            if (isSearching) return;
+            isSearching = true;
+
+            const p2LoadingOverlay = document.getElementById('p2LoadingOverlay');
+            if (p2LoadingOverlay) p2LoadingOverlay.classList.remove('hidden');
+
+            setTimeout(() => {
+                isSearching = false;
+                const botName = OPPONENT_NAMES[Math.floor(Math.random() * OPPONENT_NAMES.length)];
+                const randomTitle = TITLES_CATALOG[Math.floor(Math.random() * TITLES_CATALOG.length)];
+
+                const p2NameTag = document.getElementById('p2NameTag');
+                const p2EquippedTitleBadge = document.getElementById('p2EquippedTitleBadge');
+                const p2StatusDot = document.getElementById('p2StatusDot');
+                const p2RankTag = document.getElementById('p2RankTag');
+
+                if (p2NameTag) p2NameTag.innerText = botName;
+                if (p2EquippedTitleBadge) p2EquippedTitleBadge.innerText = `[TITLE: ${randomTitle.name.toUpperCase()}]`;
+                if (p2StatusDot) p2StatusDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
+                if (p2RankTag) p2RankTag.innerText = currentMode === 'ranked' ? 'RANKED LOBBY' : '100% AURA RATING';
+
+                if (currentMode === 'duo' || currentMode === 'ranked') {
+                    const allyName = ALLY_NAMES[Math.floor(Math.random() * ALLY_NAMES.length)];
+                    const allyNameTag = document.getElementById('allyNameTag');
+                    const enemy2NameTag = document.getElementById('enemy2NameTag');
+                    if (allyNameTag) allyNameTag.innerText = `ALLY (${allyName.toUpperCase()})`;
+                    if (enemy2NameTag) enemy2NameTag.innerText = `OPPONENT 2 (${OPPONENT_NAMES[Math.floor(Math.random() * OPPONENT_NAMES.length)].toUpperCase()})`;
+                }
+
+                if (p2LoadingOverlay) p2LoadingOverlay.classList.add('hidden');
+
+                playSound('matchFound');
+                appendChatMessage('SYSTEM', `Match connected! Opponent: ${botName} [${randomTitle.name.toUpperCase()}]. 30s battle starts now!`);
+                startOpponentLoops();
+                startMatchTimer();
+            }, 1500);
+        }
+
+        function skipMatch() {
+            if (currentMode === 'ranked') {
+                rankedPoints = Math.max(0, rankedPoints - 25);
+                winStreak = 0;
+                updateRankedUI();
+                appendChatMessage('SYSTEM', 'Match forfeited in Ranked mode (-25 RP)!');
+            }
+
+            p2State.score = 0;
+            allyState.score = 0;
+            enemy2State.score = 0;
+            const p2Score = document.getElementById('p2Score');
+            const allyScore = document.getElementById('allyScore');
+            const enemy2Score = document.getElementById('enemy2Score');
+            if (p2Score) p2Score.innerText = '0';
+            if (allyScore) allyScore.innerText = '0';
+            if (enemy2Score) enemy2Score.innerText = '0';
+            appendChatMessage('SYSTEM', 'Returned to lobby / skipped match.');
+            showLobbyScreen();
+        }
+
+        function updateEconomyDisplays() {
+            const diamondBalance = document.getElementById('diamondBalance');
+            const cashBalance = document.getElementById('cashBalance');
+            if (diamondBalance) diamondBalance.innerText = userDiamonds.toLocaleString();
+            if (cashBalance) cashBalance.innerText = `$${userCash.toFixed(2)}`;
+        }
+
+        function topUpTestCash() {
+            userCash += 5.00;
+            userDiamonds += 1000;
+            updateEconomyDisplays();
+            appendChatMessage('SYSTEM', 'Added test cash +$5.00 and +1,000 Diamonds!');
+        }
+
+        function openShopModal() {
+            const shopModal = document.getElementById('shopModal');
+            if (shopModal) shopModal.classList.remove('hidden');
+            renderShopContent();
+        }
+
+        function closeShopModal() {
+            const shopModal = document.getElementById('shopModal');
+            if (shopModal) shopModal.classList.add('hidden');
+        }
+
+        function switchShopTab(tab) {
+            currentShopTab = tab;
+            const shopTabDiamonds = document.getElementById('shopTabDiamonds');
+            const shopTabTitles = document.getElementById('shopTabTitles');
+            const shopTabAuras = document.getElementById('shopTabAuras');
+
+            if (shopTabDiamonds) shopTabDiamonds.className = tab === 'diamonds' ? 'px-3 py-1.5 rounded-xl font-orbitron font-bold text-xs bg-cyan-500 text-slate-950' : 'px-3 py-1.5 rounded-xl font-orbitron font-bold text-xs bg-slate-800 text-slate-300';
+            if (shopTabTitles) shopTabTitles.className = tab === 'titles' ? 'px-3 py-1.5 rounded-xl font-orbitron font-bold text-xs bg-cyan-500 text-slate-950' : 'px-3 py-1.5 rounded-xl font-orbitron font-bold text-xs bg-slate-800 text-slate-300';
+            if (shopTabAuras) shopTabAuras.className = tab === 'auras' ? 'px-3 py-1.5 rounded-xl font-orbitron font-bold text-xs bg-cyan-500 text-slate-950' : 'px-3 py-1.5 rounded-xl font-orbitron font-bold text-xs bg-slate-800 text-slate-300';
+
+            renderShopContent();
+        }
+
+        function renderShopContent() {
+            const area = document.getElementById('shopContentArea');
+            if (!area) return;
+            area.innerHTML = '';
+
+            if (currentShopTab === 'diamonds') {
+                DIAMOND_BUNDLES.forEach(b => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between';
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fa-solid fa-gem text-cyan-400 text-xl"></i>
+                                <h4 class="font-orbitron font-bold text-white text-sm">${b.diamonds.toLocaleString()} DIAMONDS</h4>
+                            </div>
+                            <p class="text-[11px] font-mono text-slate-400 mb-3">${b.bonus}</p>
+                        </div>
+                        <button onclick="buyDiamondBundle('${b.id}')" class="w-full py-2 bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-orbitron font-black text-xs rounded-xl shadow-lg transition hover:scale-102">
+                            BUY FOR $${b.price.toFixed(2)}
+                        </button>
+                    `;
+                    area.appendChild(card);
+                });
+            } else if (currentShopTab === 'titles') {
+                TITLES_CATALOG.forEach(t => {
+                    const isEquipped = equippedTitleId === t.id;
+                    const card = document.createElement('div');
+                    card.className = 'bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between';
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-orbitron font-bold text-amber-400 text-sm">[${t.name.toUpperCase()}]</span>
+                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-400">3.5$ / 100 💎</span>
+                            </div>
+                            <p class="text-[10px] font-mono text-slate-400 mb-3">Exclusive battle title badge visible to opponents.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            ${t.unlocked ? `
+                                <button onclick="equipTitle('${t.id}')" class="flex-1 py-2 ${isEquipped ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-amber-300 hover:bg-slate-700'} font-orbitron font-bold text-xs rounded-xl transition">
+                                    ${isEquipped ? 'EQUIPPED' : 'EQUIP'}
+                                </button>
+                            ` : `
+                                <button onclick="buyTitleWithDiamonds('${t.id}')" class="flex-1 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-orbitron font-bold text-xs rounded-xl transition">
+                                    100 💎
+                                </button>
+                                <button onclick="buyTitleWithCash('${t.id}')" class="flex-1 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-orbitron font-bold text-xs rounded-xl transition">
+                                    $3.50
+                                </button>
+                            `}
+                        </div>
+                    `;
+                    area.appendChild(card);
+                });
+            } else if (currentShopTab === 'auras') {
+                FLAME_AURAS.forEach(a => {
+                    const isActive = activeAuraId === a.id;
+                    const card = document.createElement('div');
+                    card.className = 'bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between';
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="w-3 h-3 rounded-full" style="background-color: ${a.primary};"></span>
+                                <h4 class="font-orbitron font-bold text-white text-sm">${a.name}</h4>
+                            </div>
+                            <p class="text-[10px] font-mono text-slate-400 mb-3">Goku Body Flame Aura particle color effect.</p>
+                        </div>
+                        <button onclick="equipAura('${a.id}')" class="w-full py-2 ${isActive ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-amber-300 hover:bg-slate-700'} font-orbitron font-bold text-xs rounded-xl transition">
+                            ${isActive ? 'ACTIVE AURA' : 'EQUIP AURA'}
+                        </button>
+                    `;
+                    area.appendChild(card);
+                });
+            }
+        }
+
+        function buyDiamondBundle(packId) {
+            const bundle = DIAMOND_BUNDLES.find(b => b.id === packId);
+            if (!bundle) return;
+            if (userCash >= bundle.price) {
+                userCash -= bundle.price;
+                userDiamonds += bundle.diamonds;
+                updateEconomyDisplays();
+                renderShopContent();
+                appendChatMessage('SYSTEM', `Successfully purchased ${bundle.diamonds.toLocaleString()} Diamonds for $${bundle.price.toFixed(2)}!`);
+            } else {
+                alert("Insufficient cash balance! Use the '+' button in the header to add test cash.");
+            }
+        }
+
+        function buyTitleWithDiamonds(titleId) {
+            const title = TITLES_CATALOG.find(t => t.id === titleId);
+            if (!title) return;
+            if (userDiamonds >= 100) {
+                userDiamonds -= 100;
+                title.unlocked = true;
+                equipTitle(titleId);
+                updateEconomyDisplays();
+                renderShopContent();
+                appendChatMessage('SYSTEM', `Unlocked title [${title.name.toUpperCase()}] for 100 Diamonds!`);
+            } else {
+                alert("Not enough Diamonds! Buy a Diamond bundle in the store.");
+            }
+        }
+
+        function buyTitleWithCash(titleId) {
+            const title = TITLES_CATALOG.find(t => t.id === titleId);
+            if (!title) return;
+            if (userCash >= 3.50) {
+                userCash -= 3.50;
+                title.unlocked = true;
+                equipTitle(titleId);
+                updateEconomyDisplays();
+                renderShopContent();
+                appendChatMessage('SYSTEM', `Unlocked title [${title.name.toUpperCase()}] for $3.50!`);
+            } else {
+                alert("Insufficient cash balance! Add test cash using the '+' button in the header.");
+            }
+        }
+
+        function equipTitle(titleId) {
+            const title = TITLES_CATALOG.find(t => t.id === titleId);
+            if (!title || !title.unlocked) return;
+            equippedTitleId = titleId;
+
+            const p1EquippedTitleBadge = document.getElementById('p1EquippedTitleBadge');
+            if (p1EquippedTitleBadge) p1EquippedTitleBadge.innerText = `[TITLE: ${title.name.toUpperCase()}]`;
+
+            renderShopContent();
+            appendChatMessage('SYSTEM', `Equipped title: [${title.name.toUpperCase()}]`);
+        }
+
+        function equipAura(auraId) {
+            const aura = FLAME_AURAS.find(a => a.id === auraId);
+            if (!aura) return;
+            activeAuraId = auraId;
+
+            const activeAuraBadge = document.getElementById('activeAuraBadge');
+            if (activeAuraBadge) activeAuraBadge.innerText = aura.name.toUpperCase();
+
+            renderShopContent();
+            appendChatMessage('SYSTEM', `Equipped Goku Flame Aura: ${aura.name}`);
+        }
+
+        function renderMoveGuideList() {
+            const container = document.getElementById('moveGuideList');
+            if (!container) return;
+            container.innerHTML = '';
+
+            MOVE_GUIDE.forEach(m => {
+                const item = document.createElement('div');
+                item.className = 'bg-slate-950 p-2 rounded-xl border border-slate-800 flex items-center gap-2';
+                item.innerHTML = `
+                    <div class="p-1.5 bg-amber-500/20 text-amber-400 rounded-lg"><i class="fa-solid ${m.icon} text-xs"></i></div>
+                    <div class="overflow-hidden">
+                        <div class="font-orbitron font-bold text-[11px] text-white truncate">${m.name}</div>
+                        <div class="text-[9px] font-mono text-cyan-400">+${m.pts} PTS</div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function appendChatMessage(sender, text) {
+            const box = document.getElementById('chatMessagesBox');
+            if (!box) return;
+            const div = document.createElement('div');
+            div.innerHTML = `<span class="text-amber-400 font-bold">[${sender}]:</span> <span class="text-slate-300">${text}</span>`;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function handleSendChat(event) {
+            event.preventDefault();
+            const input = document.getElementById('chatInput');
+            if (!input) return;
+            const val = input.value.trim();
+            if (!val) return;
+
+            appendChatMessage('YOU', val);
+            input.value = '';
+
+            setTimeout(() => {
+                const botReplies = [
+                    "Absolute maxing aura! 🔥",
+                    "You can't match my Super Saiyan flame!",
+                    "Bro is glowing like Goku UI!",
+                    "GGs in the chat!"
+                ];
+                const reply = botReplies[Math.floor(Math.random() * botReplies.length)];
+                const p2NameTag = document.getElementById('p2NameTag');
+                appendChatMessage(p2NameTag ? p2NameTag.innerText : 'OPPONENT', reply);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
